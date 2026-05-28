@@ -18,7 +18,9 @@ def scrape_samsung_page(url):
 
         # Title
         title = soup.find("h1")
-        title_text = title.get_text(strip=True) if title else "No title"
+        if title in ["Quck help", None]:
+            return None
+        title_text = title.get_text(strip=True)
 
         for tag in soup.find_all(["nav", "footer", "header"]):
             tag.decompose()
@@ -36,6 +38,9 @@ def scrape_samsung_page(url):
             if (len(text) > 20
                     and text not in seen
                     and "javascript" not in text.lower()):
+                # end of doc
+                if "We would love your feedback!" in text:
+                    break
 
                 # Add Subtitle (with ##)
                 if tag.name in ["h2", "h3"]:
@@ -83,6 +88,8 @@ for url in example_urls:
     if data:
         count += 1
         print(f"✓ {data['title']}")
+        print(data["content"])
+        break
         with open("samsung_docs.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
