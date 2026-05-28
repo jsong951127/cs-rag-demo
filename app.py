@@ -19,7 +19,7 @@ with open("samsung_docs.jsonl", "r", encoding="utf-8") as f:
             docs.append(json.loads(line))
 print(f"{len(docs)} documents loaded.")
 
-# 2. ## chunk by sections
+# 2. chunk by subtitles
 print("Chunking...")
 splitter = MarkdownHeaderTextSplitter(
     headers_to_split_on=[("##", "section")]
@@ -31,6 +31,7 @@ for doc in docs:
     for section in sections:
         section.metadata["url"] = doc["url"]
         section.metadata["title"] = doc["title"]
+        section.page_content = f"{doc['title']}\n{section.page_content}"
         chunks.append(section)
 
 print(f"{len(chunks)} chunks generated.")
@@ -41,7 +42,7 @@ embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 vectorstore = FAISS.from_documents(chunks, embeddings)
 print("Storing Vector...")
 
-# 4. LLM
+# 4. LLM for summarization
 llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
 
 prompt = ChatPromptTemplate.from_template("""
@@ -59,7 +60,7 @@ Provide a clear and concise summary answer based on all the documents above.
 
 chain = prompt | llm | StrOutputParser()
 
-# 5. 검색 + 답변
+# 5. RAG
 print("\n=== Samsung CS RAG Chatbot ===\n")
 
 while True:
@@ -67,10 +68,9 @@ while True:
     if question == "q":
         break
 
-    # Top 3 문서 검색
+    # Retrieve Top 3 documents
     top_docs = vectorstore.similarity_search(question, k=3)
 
-    # 관련 문서 출력
     print("\n📋 Relevant Documents:")
     seen_urls = []
     context_parts = []
@@ -78,18 +78,18 @@ while True:
     for i, doc in enumerate(top_docs):
         title = doc.metadata.get("title", "Unknown")
         url = doc.metadata.get("url", "")
-        content_preview = doc.page_content[:200].replace("\n", " ")
+        content_without_title = "\n".join(doc.page_content.split("\n")[1:])
 
         print(f"\n{i + 1}. {title}")
         print(f"   🔗 {url}")
-        print(f"   📄 {content_preview}...")
+        print(f"   📄 {content_without_title[:200]}...")
 
         context_parts.append(f"[Document {i + 1}] {title}\n{doc.page_content}")
         seen_urls.append(url)
 
-    # 종합 요약 답변
+    # Summary
     context = "\n\n".join(context_parts)
     answer = chain.invoke({"context": context, "question": question})
 
-    print(f"\n✨ 요약 답변:\n{answer}\n")
+    print(f"\n✨ Summary Answer:\n{answer}\n")
     print("-" * 50)
