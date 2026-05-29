@@ -1,6 +1,6 @@
 # Samsung CS RAG Demo
 
-A Retrieval-Augmented Generation (RAG) based customer support Ωchatbot 
+A Retrieval-Augmented Generation (RAG) based customer support chatbot
 built on Samsung's official support documentation.
 
 Inspired by real-world experience building Samsung's CS Chatbot service at Samsung Electronics and LLM-based NLP pipelines at NAVER Corp.
@@ -71,7 +71,7 @@ cs-rag-demo/
 ├── app.py              # Main RAG chatbot
 ├── scrape.py           # Samsung support page scraper
 ├── streamlit_app.py    # Streamlit UI
-├── samsung_docs.jsonl  # Scraped dataset (913 pages)
+├── samsung_docs.jsonl  # Scraped dataset (909 pages)
 ├── .env.example        # Environment variable template
 ├── requirements.txt    # Dependencies
 └── README.md
