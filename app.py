@@ -71,7 +71,7 @@ while True:
     # Retrieve Top 3 documents
     top_docs = vectorstore.similarity_search(question, k=3)
 
-    print("\n📋 Relevant Documents:")
+    print("\n📋 Related Documents:")
     seen_urls = []
     context_parts = []
 
@@ -91,5 +91,5 @@ while True:
     context = "\n\n".join(context_parts)
     answer = chain.invoke({"context": context, "question": question})
 
-    print(f"\n✨ Summary Answer:\n{answer}\n")
+    print(f"\n✨ Summary:\n{answer}\n")
     print("-" * 50)

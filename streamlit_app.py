@@ -107,8 +107,8 @@ if question := st.chat_input("Ask about your Samsung device..."):
         with st.spinner("Generating answer..."):
             answer = chain.invoke({"context": context, "question": question})
 
-        st.markdown("**✨ Summary Answer:**")
+        st.markdown("**✨ Summary:**")
         st.markdown(answer)
 
-        full_response = f"**✨ Summary Answer:**\n{answer}"
+        full_response = f"**✨ Summary:**\n{answer}"
         st.session_state.messages.append({"role": "assistant", "content": full_response})

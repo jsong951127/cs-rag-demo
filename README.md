@@ -7,27 +7,39 @@ Inspired by real-world experience building Samsung's CS Chatbot service at Samsu
 
 ## Demo
 
+Link: *https://jamie-cs-rag-demo.streamlit.app/*
+
 Given a user question, the system retrieves the Top 3 most relevant 
 Samsung support documents and generates a summarized answer.
 
 **Example:**
 ```
-Question: My Samsung phone keeps restarting by itself
+Question: My phone gets very hot while charging
 
 📋 Related Documents:
-1. Samsung phone or tablet reboots repeatedly
-   🔗 https://www.samsung.com/us/support/troubleshoot/TSG10001548/
+1. Keep your Galaxy device at its normal operating temperature
+   🔗 https://www.samsung.com/us/support/answer/ANS10002887/
+   📄 Here are some tips for what to do if your Galaxy devices warms up:
+Disconnect the charger, and close any running apps until the device cools down. If you are wearing earbuds, stop playing music, don't...
 
-2. Different ways to restart your Galaxy phone
-   🔗 https://www.samsung.com/us/support/answer/ANS10001374/
+2. Keep your Galaxy device at its normal operating temperature
+   🔗 https://www.samsung.com/us/support/answer/ANS10002887/
+   📄 Although your Galaxy devices may get warm sometimes, they have built-in safeguards to alert you and protect themselves if their temperature exceeds the normal operating range. Check out the CTIA's use...
 
-3. How to use Safe Mode
-   🔗 https://www.samsung.com/us/support/answer/ANS10001997/
+3. Samsung phone or tablet will not charge
+   🔗 https://www.samsung.com/us/support/troubleshoot/TSG10001462/
+   📄 If your device is reporting that the temperature is too low to charge, unplug the charger and allow it to return to a normal temperature before proceeding.
+Verify that the device, charger, and USB cab...
 
 ✨ Summary:
-Random reboots are often caused by third-party apps or outdated software.
-Start by checking for software updates, then boot into Safe Mode to 
-identify if a downloaded app is causing the issue...
+Based on the provided documents, if your phone gets very hot while charging, here are some steps you can take:
+
+1. Disconnect the charger and close any running apps until the device cools down.
+2. Try using a different Samsung-approved charger (and USB cable) when charging.
+3. Remove metal or magnetic material between the device and the charger if using a wireless charger.
+...
+
+If the issue persists, it's recommended to contact Samsung support directly to further assist you.
 ```
 
 ## Architecture
