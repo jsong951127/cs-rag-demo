@@ -51,7 +51,7 @@ def load_vectorstore():
 vectorstore = load_vectorstore()
 
 # LLM for summarization
-llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
 
 prompt = ChatPromptTemplate.from_template("""
 You are a Samsung customer support assistant.
