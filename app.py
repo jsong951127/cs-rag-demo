@@ -72,7 +72,6 @@ while True:
     top_docs = vectorstore.similarity_search(question, k=3)
 
     print("\n📋 Related Documents:")
-    seen_urls = []
     context_parts = []
 
     for i, doc in enumerate(top_docs):
@@ -84,8 +83,7 @@ while True:
         print(f"   🔗 {url}")
         print(f"   📄 {content_without_title[:200]}...")
 
-        context_parts.append(f"[Document {i + 1}] {title}\n{doc.page_content}")
-        seen_urls.append(url)
+        context_parts.append(f"[Document {i + 1}] {title}\n{content_without_title}")
 
     # Summary
     context = "\n\n".join(context_parts)
