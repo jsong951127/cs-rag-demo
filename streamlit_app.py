@@ -1,5 +1,7 @@
 import streamlit as st
 import json
+import logging
+from pathlib import Path
 from dotenv import load_dotenv
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from langchain_community.vectorstores import FAISS
@@ -19,11 +21,28 @@ st.set_page_config(
 st.title("📱 Samsung CS RAG Chatbot Demo")
 st.caption("Ask any question about Samsung device troubleshooting")
 
-@st.cache_resource
+logger = logging.getLogger(__name__)
+
+
+@st.cache_resource(show_spinner=False)
 def load_vectorstore():
     with st.spinner("Loading Samsung support documents..."):
+        index_path = Path(__file__).with_name("faiss_index")
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"batch_size": 16},
+        )
+        if all((index_path / name).is_file() for name in ("index.faiss", "index.pkl")):
+            # Only load trusted index files
+            return FAISS.load_local(
+                str(index_path),
+                embeddings,
+                allow_dangerous_deserialization=True,
+            )
+
         docs = []
-        with open("samsung_docs.jsonl", "r", encoding="utf-8") as f:
+        with Path(__file__).with_name("samsung_docs.jsonl").open("r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -43,12 +62,19 @@ def load_vectorstore():
                 section.page_content = f"{doc['title']}\n{section.page_content}"
                 chunks.append(section)
 
-        # Creating Vector
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        if not chunks:
+            raise ValueError("No support document chunks were found.")
+
         vectorstore = FAISS.from_documents(chunks, embeddings)
+        vectorstore.save_local(str(index_path))
         return vectorstore
 
-vectorstore = load_vectorstore()
+try:
+    vectorstore = load_vectorstore()
+except Exception:
+    logger.exception("Vectorstore initialization failed")
+    st.error("Could not initialize document search. Check the server logs for the error details.")
+    st.stop()
 
 # LLM for summarization
 llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
@@ -84,8 +110,9 @@ if question := st.chat_input("Ask about your Samsung device..."):
 
     with st.chat_message("assistant"):
         # Retrieve Top 3 documents
-        top_docs = vectorstore.similarity_search(question, k=3)
+        top_docs = vectorstore.similarity_search(question, k=7)
 
+        context_parts = []
         with st.expander("📋 Related Documents"):
             for i, doc in enumerate(top_docs):
                 title = doc.metadata.get("title", "Unknown")
@@ -94,16 +121,12 @@ if question := st.chat_input("Ask about your Samsung device..."):
                 st.markdown(f"**{i+1}. {title}**")
                 st.markdown(f"🔗 [{url}]({url})")
                 st.caption(f"{content_without_title}")
+                context_parts.append(f"[Document {i + 1}] {doc.page_content}")
                 if i < 2:
                     st.divider()
 
         # Summary
-        context_parts = []
-        for i, doc in enumerate(top_docs):
-            title = doc.metadata.get("title", "")
-            context_parts.append(f"[Document {i+1}] {title}\n{doc.page_content}")
         context = "\n\n".join(context_parts)
-
         with st.spinner("Generating answer..."):
             answer = chain.invoke({"context": context, "question": question})
 
